@@ -1,0 +1,11 @@
+# FAQ Configuration
+
+# 本地文件系统数据源配置
+local_sources:
+  - name: "default_policies"
+    path: "./faq_documents"  # 相对于项目根目录的路径
+    file_patterns: 
+      - "*.md"
+      - "*.pdf"
+      - "*.docx"
+    update_interval_hours: 24  # 每24小时检查一次更新

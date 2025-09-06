@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "customer-support-chat"
+version = "0.1.0"
+description = "Customer Support Chat Application"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+langgraph = "^0.2.19"
+python-dotenv = "^1.0.1"
+langchain-openai = "^0.1.23"
+ipython = "^8.27.0"
+ddgs = "^9.5.0"
+langchain-community = "^0.2.16"
+langchain-google-community = "^1.0.8"
+qdrant-client = "^1.11.1"
+pandas = "^2.2.2"
+aiohttp = "^3.10.5"
+tqdm = "^4.66.5"
+more-itertools = "^10.5.0"
+uvicorn = {extras = ["standard"], version = "^0.35.0"}
+fastapi = "^0.116.1"
+itsdangerous = "^2.2.0"
+httpx = "^0.27.0"
+pypdf2 = "^3.0.1"
+python-docx = "^1.2.0"
+apscheduler = "^3.11.0"
+reportlab = "^4.4.3"
+gohumanloop = "^0.0.9"
+
+[[tool.poetry.source]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+priority = "primary"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
