@@ -1,0 +1,13 @@
+{
+    "session_id": "test_session",
+    "created_at": "2025-08-27T18:25:03.962616+00:00Z",
+    "last_accessed": "2025-08-28T00:15:45.543642+00:00Z",
+    "passenger_id": "5102 899977",
+    "chat_history": [],
+    "pending_action": null,
+    "user_decision": null,
+    "config": {
+        "thread_id": "8e0369a9-7b2c-4373-ac21-13d30f1b0b03",
+        "passenger_id": "5102 899977"
+    }
+}

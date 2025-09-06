@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Support Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .chat-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .chat-area {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        
+        .operation-log {
+            flex: 2;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        
+        .message-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        #send-btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        #send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .user-message {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: right;
+        }
+        
+        .ai-message {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .pending-action-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 50%;
+            max-width: 500px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .approve-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .reject-btn {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .log-entry {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
+        
+        .log-entry:hover {
+            background: #f9f9f9;
+        }
+        
+        .log-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .log-content {
+            color: #666;
+            white-space: pre-wrap;
+        }
+        
+        .log-timestamp {
+            color: #999;
+            font-size: 10px;
+            float: right;
+        }
+        
+        .tool-call {
+            border-left: 3px solid #007bff;
+        }
+        
+        .ai-response {
+            border-left: 3px solid #28a745;
+        }
+        
+        .user-input {
+            border-left: 3px solid #ffc107;
+        }
+        
+        .system-message {
+            border-left: 3px solid #6c757d;
+        }
+        
+        .error {
+            border-left: 3px solid #dc3545;
+        }
+        
+        .tool-result {
+            border-left: 3px solid #17a2b8;
+        }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .clear-log-btn {
+            padding: 5px 10px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007bff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Customer Support Chat</h1>
+    
+    <div class="chat-container">
+        <div class="chat-area">
+            <div id="chat-messages" class="chat-messages">
+                {% for message in chat_history %}
+                <div class="user-message">
+                    <strong>You:</strong> {{ message.user_message }}
+                </div>
+                <div class="ai-message">
+                    <strong>Assistant:</strong> {{ message.ai_response }}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="loading" id="loading-indicator">
+                <div class="spinner"></div>
+                Processing your request...
+            </div>
+            
+            <div class="message-input">
+                <input type="text" id="user-input" placeholder="Type your message here..." />
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+        
+        <div class="operation-log">
+            <div class="log-header">
+                <h3>Operation Log</h3>
+                <button class="clear-log-btn" onclick="clearOperationLog()">Clear Log</button>
+            </div>
+            <div id="operation-log-content"></div>
+        </div>
+    </div>
+    
+    <div id="pending-action-modal" class="pending-action-modal">
+        <div class="modal-content">
+            <h3>Pending Action Requires Approval</h3>
+            <div id="pending-action-details"></div>
+            <div class="modal-buttons">
+                <button class="approve-btn" onclick="approveAction()">Approve</button>
+                <button class="reject-btn" onclick="rejectAction()">Reject</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Get DOM elements
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const pendingActionModal = document.getElementById('pending-action-modal');
+        const pendingActionDetails = document.getElementById('pending-action-details');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const operationLogContent = document.getElementById('operation-log-content');
+        
+        // Function to add a message to the chat
+        function addMessage(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender === 'user' ? 'user-message' : 'ai-message';
+            messageDiv.innerHTML = `<strong>${sender === 'user' ? 'You' : 'Assistant'}:</strong> ${message}`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Function to send a message to the chat API
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            // Disable the input and show loading indicator
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+            loadingIndicator.style.display = 'block';
+            
+            try {
+                addMessage('user', message);
+                userInput.value = '';
+                
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage('assistant', `Error: ${data.error}`);
+                } else {
+                    addMessage('assistant', data.response);
+                }
+            } catch (error) {
+                addMessage('assistant', 'An unexpected error occurred. Please try again later.');
+                console.error('Error:', error);
+            } finally {
+                // Re-enable the input and hide loading indicator
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                loadingIndicator.style.display = 'none';
+                userInput.focus();
+            }
+        }
+        
+        // Function to check for pending actions
+        async function checkPendingAction() {
+            try {
+                const response = await fetch('/pending-action');
+                const data = await response.json();
+                
+                if (data.pending_action) {
+                    // Display the pending action modal
+                    let detailsHTML = '<h4>Tool Calls:</h4><ul>';
+                    data.pending_action.tool_calls.forEach(toolCall => {
+                        detailsHTML += `<li><strong>${toolCall.name}</strong>: ${JSON.stringify(toolCall.args)}</li>`;
+                    });
+                    detailsHTML += '</ul>';
+                    pendingActionDetails.innerHTML = detailsHTML;
+                    pendingActionModal.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error checking pending action:', error);
+            }
+        }
+        
+        // Function to approve an action
+        async function approveAction() {
+            try {
+                const response = await fetch('/approve-action', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ decision: 'approve' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage('assistant', `Error: ${data.error}`);
+                } else {
+                    addMessage('assistant', data.response);
+                }
+                
+                // Hide the modal
+                pendingActionModal.style.display = 'none';
+            } catch (error) {
+                console.error('Error approving action:', error);
+                addMessage('assistant', 'An unexpected error occurred while processing your approval.');
+            }
+        }
+        
+        // Function to reject an action
+        async function rejectAction() {
+            try {
+                const response = await fetch('/reject-action', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ decision: 'reject' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage('assistant', `Error: ${data.error}`);
+                } else {
+                    addMessage('assistant', data.response);
+                }
+                
+                // Hide the modal
+                pendingActionModal.style.display = 'none';
+            } catch (error) {
+                console.error('Error rejecting action:', error);
+                addMessage('assistant', 'An unexpected error occurred while processing your rejection.');
+            }
+        }
+        
+        // Function to fetch and display operation log
+        async function fetchOperationLog() {
+            try {
+                const response = await fetch('/operation-log');
+                const data = await response.json();
+                
+                if (data.error) {
+                    operationLogContent.innerHTML = `<div class="log-entry error">Error: ${data.error}</div>`;
+                } else {
+                    displayOperationLog(data.operation_log);
+                }
+            } catch (error) {
+                console.error('Error fetching operation log:', error);
+                operationLogContent.innerHTML = '<div class="log-entry error">Error fetching operation log</div>';
+            }
+        }
+        
+        // Function to display operation log
+        function displayOperationLog(logEntries) {
+            if (!logEntries || logEntries.length === 0) {
+                operationLogContent.innerHTML = '<div class="log-entry">No operation log entries</div>';
+                return;
+            }
+            
+            let logHTML = '';
+            logEntries.forEach(entry => {
+                const timestamp = new Date(entry.timestamp).toLocaleTimeString();
+                logHTML += `
+                    <div class="log-entry ${entry.type}">
+                        <div class="log-title">${entry.title}</div>
+                        <div class="log-content">${entry.content}</div>
+                        <div class="log-timestamp">${timestamp}</div>
+                    </div>
+                `;
+            });
+            
+            operationLogContent.innerHTML = logHTML;
+        }
+        
+        // Function to clear operation log
+        async function clearOperationLog() {
+            // For now, we'll just refresh the log to show the most recent entries
+            // In a future implementation, we could add a clear endpoint
+            fetchOperationLog();
+        }
+        
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+        
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Poll for pending actions every 5 seconds (reduced frequency)
+        let pendingActionRetryCount = 0;
+        const maxPendingActionRetries = 3;
+        
+        async function checkPendingActionWithRetry() {
+            try {
+                await checkPendingAction();
+                pendingActionRetryCount = 0; // Reset retry count on success
+            } catch (error) {
+                pendingActionRetryCount++;
+                console.error(`Error checking pending action (attempt ${pendingActionRetryCount}):`, error);
+                
+                if (pendingActionRetryCount >= maxPendingActionRetries) {
+                    console.error('Max retries reached for pending action check');
+                    pendingActionRetryCount = 0; // Reset retry count
+                }
+            }
+        }
+        
+        // Poll for operation log every 10 seconds (reduced frequency)
+        let operationLogRetryCount = 0;
+        const maxOperationLogRetries = 3;
+        
+        async function fetchOperationLogWithRetry() {
+            try {
+                await fetchOperationLog();
+                operationLogRetryCount = 0; // Reset retry count on success
+            } catch (error) {
+                operationLogRetryCount++;
+                console.error(`Error fetching operation log (attempt ${operationLogRetryCount}):`, error);
+                
+                if (operationLogRetryCount >= maxOperationLogRetries) {
+                    console.error('Max retries reached for operation log fetch');
+                    operationLogRetryCount = 0; // Reset retry count
+                }
+            }
+        }
+        
+        setInterval(checkPendingActionWithRetry, 5000);
+        setInterval(fetchOperationLogWithRetry, 10000);
+        
+        // Initial fetch of operation log
+        fetchOperationLog();
+        
+        // Focus on the input field when the page loads
+        userInput.focus();
+    </script>
+</body>
+</html>

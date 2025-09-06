@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "web-app"
+version = "0.1.0"
+description = "Web interface for the Multi-Agent RAG Customer Support System"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+# Note: Due to network issues, we are listing core dependencies manually.
+# In a normal setup, you would use: poetry add fastapi[all] httpx python-multipart
+# For now, we list the key packages that FastAPI[all] typically includes.
+fastapi = "^0.112.2"
+uvicorn = {version = "^0.30.6", extras = ["standard"]}
+jinja2 = "^3.1.4" # For templating, part of fastapi[all]
+python-multipart = "^0.0.9" # For form data parsing
+httpx = "^0.27.2" # For making HTTP requests, useful for internal calls
+itsdangerous = "^2.2.0" # Required for SessionMiddleware
+
+[[tool.poetry.source]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+priority = "primary"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
