@@ -29,6 +29,7 @@ from .excursions import (
 from .woocommerce import search_products, search_orders
 from .forms import submit_form
 from .blog import search_blog_posts
+from .youcom_search import YouComSearchResults
 
 __all__ = [
     "lookup_policy",
@@ -54,4 +55,5 @@ __all__ = [
     "search_orders",
     "submit_form",
     "search_blog_posts",
+    "YouComSearchResults",
 ]
