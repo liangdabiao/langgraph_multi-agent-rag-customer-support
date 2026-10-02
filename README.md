@@ -77,6 +77,10 @@ LANGCHAIN_API_KEY="your_langsmith_api_key" # 可选
 # WOOCOMMERCE_API_URL="your_WOOCOMMERCE_API_URL"
 # WOOCOMMERCE_API_KEY="your_WOOCOMMERCE_API_KEY"
 # WOOCOMMERCE_API_SECRET="your_WOOCOMMERCE_API_SECRET"
+# 如需将主助手的网络搜索后端切换为 You.com（可选，默认仍使用 DuckDuckGo）:
+# YOUCOM_SEARCH_ENABLED="true"
+# YOUCOM_MCP_URL="https://api.you.com/mcp?profile=free" # 免费档，无需 API Key
+# YOUCOM_API_KEY="your_youcom_api_key" # 可选：配置后使用完整搜索功能（key 获取：https://you.com/platform/api-keys）
 
 ```
 

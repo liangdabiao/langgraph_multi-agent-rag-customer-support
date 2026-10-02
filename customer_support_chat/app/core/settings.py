@@ -33,6 +33,13 @@ class Config:
     
     # Blog Search API Settings
     BLOG_SEARCH_API_URL: str = environ.get("BLOG_SEARCH_API_URL", "")
+    
+    # You.com Search Settings (optional web-search backend, opt-in)
+    # When enabled, the primary assistant uses You.com web search
+    # (keyless MCP free profile by default) instead of DuckDuckGo.
+    YOUCOM_SEARCH_ENABLED: bool = environ.get("YOUCOM_SEARCH_ENABLED", "False").lower() in ("1", "true", "yes", "on")
+    YOUCOM_MCP_URL: str = environ.get("YOUCOM_MCP_URL", "https://api.you.com/mcp?profile=free")
+    YOUCOM_API_KEY: str = environ.get("YOUCOM_API_KEY", environ.get("YDC_API_KEY", ""))
 
 def get_settings():
     return Config()

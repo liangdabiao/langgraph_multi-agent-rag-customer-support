@@ -3,10 +3,12 @@ from langchain_core.prompts import ChatPromptTemplate
 from customer_support_chat.app.services.tools import (
     search_flights,
     lookup_policy,
+    YouComSearchResults,
 )
 from langchain_community.tools.ddg_search.tool import DuckDuckGoSearchResults
 from customer_support_chat.app.services.assistants.assistant_base import Assistant, llm
 from customer_support_chat.app.core.state import State
+from customer_support_chat.app.core.settings import get_settings
 from pydantic import BaseModel, Field
 
 # Import new delegation models
@@ -78,9 +80,18 @@ primary_assistant_prompt = ChatPromptTemplate.from_messages(
     ]
 ).partial(time=datetime.now())
 
+# Web search backend for the primary assistant: DuckDuckGo by default.
+# Opt in to You.com (keyless MCP free profile, no API key required) by
+# setting YOUCOM_SEARCH_ENABLED=true in the environment.
+web_search_tool = (
+    YouComSearchResults(max_results=10)
+    if get_settings().YOUCOM_SEARCH_ENABLED
+    else DuckDuckGoSearchResults(max_results=10)
+)
+
 # Primary assistant tools
 primary_assistant_tools = [
-    DuckDuckGoSearchResults(max_results=10),
+    web_search_tool,
     search_flights,
     lookup_policy,
     ToFlightBookingAssistant,
